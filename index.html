@@ -99,7 +99,9 @@ tbody tr:nth-child(odd) {
   color: #9ca3af;
 }
 </style>
-</head>
+</head> <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
+
 
 <body>
 
@@ -270,6 +272,12 @@ loadState();
 updateModeUI();
 display();
 
-</script>
+</script>if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .catch(err => console.log('SW registration failed', err));
+  });
+}
+
 </body>
 </html>
