@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Bourse à Bières – Les Amis4ever</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+/* === CSS intégré depuis JSFiddle === */
+body {
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
+  margin: 0;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 5px;
+}
+h2 {
+  text-align: center;
+  margin-top: 0;
+  font-weight: normal;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+#toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+button {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-primary {
+  background: #2563eb;
+  color: white;
+}
+.btn-ghost {
+  background: transparent;
+  color: #e5e7eb;
+  border: 1px solid #4b5563;
+}
+.small {
+  font-size: 0.8rem;
+}
+#banner {
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+  display: none;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #020617;
+  border-radius: 12px;
+  overflow: hidden;
+}
+th, td {
+  padding: 10px 8px;
+  text-align: center;
+}
+thead {
+  background: #111827;
+}
+tbody tr:nth-child(even) {
+  background: #020617;
+}
+tbody tr:nth-child(odd) {
+  background: #030712;
+}
+.admin-off td.action-cell {
+  display: none;
+}
+.price { font-weight: bold; }
+.up { animation: flashUp 0.4s; }
+.down { animation: flashDown 0.4s; }
+@keyframes flashUp {
+  from { background-color: #14532d; }
+  to { background-color: transparent; }
+}
+@keyframes flashDown {
+  from { background-color: #7f1d1d; }
+  to { background-color: transparent; }
+}
+.arrow-up { color: #22c55e; }
+.arrow-down { color: #ef4444; }
+.arrow-flat { color: #9ca3af; }
+.sold-badge {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🍺 Bourse à Bières</h1>
+<h2>Les prix fluctuent en temps réel selon les ventes – Wall Street du houblon</h2>
+
+<div id="toolbar">
+  <button class="btn-primary" onclick="toggleAdmin()" id="modeBtn">
+    Mode admin : ON (boutons visibles)
+  </button>
+  <button class="btn-ghost small" onclick="resetDemand()">
+    Réinitialiser les ventes
+  </button>
+  <button class="btn-ghost small" onclick="hardReset()">
+    Remise à zéro complète
+  </button>
+</div>
+
+<div id="banner"></div>
+
+<table id="board">
+  <thead>
+    <tr>
+      <th>Boisson</th>
+      <th>Prix</th>
+      <th>Variation</th>
+      <th>Vendus</th>
+      <th class="action-cell">Action</th>
+    </tr>
+  </thead>
+  <tbody id="table-body"></tbody>
+</table>
+
+<script>
+/* === JavaScript intégré depuis ton Fiddle + mode admin/public === */
+
+const INITIAL_BEERS = [
+  { name:"Jupiler", price:5.0, min:1.0, max:7.0 },
+  { name:"Leffe Blonde", price:4.73, min:1.5, max:6.5 },
+  { name:"Chouffe", price:2.01, min:1.0, max:5.5 },
+  { name:"Kriek", price:1.5, min:1.0, max:5.0 },
+  { name:"Triple Karmeliet", price:7.0, min:2.0, max:8.0 },
+  { name:"Soft / Mocktail", price:1.0, min:1.0, max:4.0 }
+];
+
+let beers = [];
+let adminMode = false;
+
+// Mode admin via URL ?admin=1
+const urlParams = new URLSearchParams(window.location.search);
+adminMode = urlParams.get("admin") === "1";
+
+function loadState() {
+  const saved = localStorage.getItem("boursiere-beers");
+  if (saved) beers = JSON.parse(saved);
+  else {
+    beers = INITIAL_BEERS.map(b => ({
+      ...b,
+      prevPrice: b.price,
+      demand: 0,
+      sold: 0
+    }));
+  }
+}
+
+function saveState() {
+  localStorage.setItem("boursiere-beers", JSON.stringify(beers));
+}
+
+function updateModeUI() {
+  if (adminMode) {
+    document.getElementById("toolbar").style.display = "flex";
+    document.getElementById("modeBtn").textContent = "Mode admin : ON";
+    document.getElementById("board").classList.remove("admin-off");
+  } else {
+    document.getElementById("toolbar").style.display = "none";
+    document.getElementById("board").classList.add("admin-off");
+  }
+}
+
+function display() {
+  const tbody = document.getElementById("table-body");
+  tbody.innerHTML = "";
+
+  beers.forEach((b, i) => {
+    let arrow = '<span class="arrow-flat">—</span>';
+    if (b.price > b.prevPrice) arrow = '<span class="arrow-up">▲</span>';
+    else if (b.price < b.prevPrice) arrow = '<span class="arrow-down">▼</span>';
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${b.name}</td>
+      <td class="price">${b.price.toFixed(2)} €</td>
+      <td>${arrow}</td>
+      <td><span class="sold-badge">${b.sold} vendus</span></td>
+      <td class="action-cell">${
+        adminMode ? `<button onclick="sell(${i})">Vendu 🍻</button>` : ""
+      }</td>
+    `;
+
+    // animation montée/descente
+    if (b.price > b.prevPrice) tr.classList.add("up");
+    if (b.price < b.prevPrice) tr.classList.add("down");
+
+    tbody.appendChild(tr);
+  });
+}
+
+function sell(index) {
+  beers[index].sold++;
+  beers[index].demand++;
+  updatePrices();
+  saveState();
+  display();
+}
+
+function updatePrices() {
+  const totalDemand = beers.reduce((s, b) => s + b.demand, 0);
+  const baseline = 1 / beers.length;
+
+  beers.forEach(b => {
+    b.prevPrice = b.price;
+
+    let ratio = totalDemand === 0 ? baseline : b.demand / totalDemand;
+    let delta = ratio - baseline;
+
+    b.price += delta * 0.8;
+    b.price -= (baseline - Math.min(ratio, baseline)) * 0.3;
+
+    b.price = Math.max(b.min, Math.min(b.max, b.price));
+  });
+}
+
+function toggleAdmin() {
+  adminMode = !adminMode;
+
+  if (adminMode) window.history.replaceState({}, "", "?admin=1");
+  else window.history.replaceState({}, "", window.location.pathname);
+
+  updateModeUI();
+  display();
+}
+
+function resetDemand() {
+  beers.forEach(b => b.demand = 0);
+  saveState();
+  display();
+}
+
+function hardReset() {
+  beers = INITIAL_BEERS.map(b => ({
+    ...b,
+    prevPrice: b.price,
+    demand: 0,
+    sold: 0
+  }));
+  saveState();
+  display();
+}
+
+window.addEventListener("storage", () => {
+  loadState();
+  display();
+});
+
+loadState();
+updateModeUI();
+display();
+
+</script>
+</body>
+</html>
