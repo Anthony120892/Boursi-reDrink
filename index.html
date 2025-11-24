@@ -1,107 +1,109 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<title>Bourse à Bières – Les Amis4ever</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Bourse à Bières – Les Amis4ever</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-/* === CSS intégré depuis JSFiddle === */
-body {
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: #e5e7eb;
-  margin: 0;
-  padding: 20px;
-}
-h1 {
-  text-align: center;
-  margin-bottom: 5px;
-}
-h2 {
-  text-align: center;
-  margin-top: 0;
-  font-weight: normal;
-  font-size: 0.9rem;
-  color: #9ca3af;
-}
-#toolbar {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-}
-button {
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-}
-.btn-primary {
-  background: #2563eb;
-  color: white;
-}
-.btn-ghost {
-  background: transparent;
-  color: #e5e7eb;
-  border: 1px solid #4b5563;
-}
-.small {
-  font-size: 0.8rem;
-}
-#banner {
-  text-align: center;
-  margin-bottom: 10px;
-  font-weight: bold;
-  display: none;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #020617;
-  border-radius: 12px;
-  overflow: hidden;
-}
-th, td {
-  padding: 10px 8px;
-  text-align: center;
-}
-thead {
-  background: #111827;
-}
-tbody tr:nth-child(even) {
-  background: #020617;
-}
-tbody tr:nth-child(odd) {
-  background: #030712;
-}
-.admin-off td.action-cell {
-  display: none;
-}
-.price { font-weight: bold; }
-.up { animation: flashUp 0.4s; }
-.down { animation: flashDown 0.4s; }
-@keyframes flashUp {
-  from { background-color: #14532d; }
-  to { background-color: transparent; }
-}
-@keyframes flashDown {
-  from { background-color: #7f1d1d; }
-  to { background-color: transparent; }
-}
-.arrow-up { color: #22c55e; }
-.arrow-down { color: #ef4444; }
-.arrow-flat { color: #9ca3af; }
-.sold-badge {
-  font-size: 0.8rem;
-  color: #9ca3af;
-}
-</style>
-</head> <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f172a">
 
+  <style>
+  /* === CSS intégré depuis JSFiddle === */
+  body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  h2 {
+    text-align: center;
+    margin-top: 0;
+    font-weight: normal;
+    font-size: 0.9rem;
+    color: #9ca3af;
+  }
+  #toolbar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+  button {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .btn-primary {
+    background: #2563eb;
+    color: white;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: #e5e7eb;
+    border: 1px solid #4b5563;
+  }
+  .small {
+    font-size: 0.8rem;
+  }
+  #banner {
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+    display: none;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #020617;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 10px 8px;
+    text-align: center;
+  }
+  thead {
+    background: #111827;
+  }
+  tbody tr:nth-child(even) {
+    background: #020617;
+  }
+  tbody tr:nth-child(odd) {
+    background: #030712;
+  }
+  .admin-off td.action-cell {
+    display: none;
+  }
+  .price { font-weight: bold; }
+  .up { animation: flashUp 0.4s; }
+  .down { animation: flashDown 0.4s; }
+  @keyframes flashUp {
+    from { background-color: #14532d; }
+    to { background-color: transparent; }
+  }
+  @keyframes flashDown {
+    from { background-color: #7f1d1d; }
+    to { background-color: transparent; }
+  }
+  .arrow-up { color: #22c55e; }
+  .arrow-down { color: #ef4444; }
+  .arrow-flat { color: #9ca3af; }
+  .sold-badge {
+    font-size: 0.8rem;
+    color: #9ca3af;
+  }
+  </style>
+</head>
 
 <body>
 
@@ -271,13 +273,17 @@ window.addEventListener("storage", () => {
 loadState();
 updateModeUI();
 display();
+</script>
 
-</script>if ('serviceWorker' in navigator) {
+<!-- Script séparé pour le service worker -->
+<script>
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
       .catch(err => console.log('SW registration failed', err));
   });
 }
+</script>
 
 </body>
 </html>
